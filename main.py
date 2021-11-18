@@ -1,13 +1,3 @@
-"""
-    PyTorch training code for Wide Residual Networks:
-    http://arxiv.org/abs/1605.07146
-
-    The code reproduces *exactly* it's lua version:
-    https://github.com/szagoruyko/wide-residual-networks
-
-    2016 Sergey Zagoruyko
-"""
-
 import argparse
 import os
 import json

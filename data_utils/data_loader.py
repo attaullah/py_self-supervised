@@ -1,20 +1,10 @@
 import numpy as np
 import os
-import sys
-import gzip
 from scipy.io import loadmat
-import pickle
 import plant_village
-
-
-if 'weka' in os.uname()[1]:
-    from pathlib import Path
-    home = str(Path.home())
-    base_path = home +'/Desktop/sftp/repository/a19/'
-else:
-    base_path = '/research/repository/a19/'
-
 import _pickle as cPickle
+
+base_path = '/path/to/'
 
 
 def load_batch(fpath, label_key='labels'):

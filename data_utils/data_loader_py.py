@@ -1,18 +1,8 @@
 import numpy as np
 from .plant_village import  load_dataset
 import torchvision
-import os
 
-base_path = '/research/repository/a19/datasets/'
-if "weka6" in os.uname()[1]:
-    from pathlib import Path
-    home = str(Path.home())
-    # base_path = home + '/Desktop/sftp/repository/a19/'
-    base_path = '/home/attaullah/Desktop/sftp/research/repository/a19/datasets/'
-elif "weka14" in os.uname()[1]:
-    base_path = '/home/ml/Desktop/sftp/research/repository/a19/datasets/'
-
-# base_path = "../githubs/myrepos/downsampled-plant-disease-dataset/data"  # /research/repository/a19
+base_path = '/path/to/'
 
 
 def mnist(name):
