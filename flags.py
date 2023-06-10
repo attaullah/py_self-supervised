@@ -10,7 +10,7 @@ def setup_flags():
     flags.DEFINE_enum(name="dataset", default="cifar10", enum_values=["cifar10", "svhn", "plant32", "plant64",
                                                                       "plant96"], help="dataset name")
     flags.DEFINE_enum(name="network", default="wrn-28-2", enum_values=["wrn-28-2", "resnet18", "vgg16", "resnet34",
-                                                                       "resnet20", "resnet50", "ssdl"],
+                                                                       "resnet20", "resnet50", "ssdl","vit"],
                       help="network architecture.")
     flags.DEFINE_boolean('weights', help="random or ImageNet pretrained weights", default=False)
     flags.DEFINE_integer("batch_size", help="size of mini-batch", default=128)

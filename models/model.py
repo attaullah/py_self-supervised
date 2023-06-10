@@ -35,6 +35,10 @@ def get_network(arch, size=32, channels=3, num_classes=-1, weights=False, d_set=
     elif 'resnet50' in arch:
         es = 64
         base = vision_models.resnet50(pretrained=weights)  #
+    elif 'vit' in arch:
+        from .vit import ViT
+        es = 0
+        base = ViT(image_size=size,patch_size=8,num_classes=num_classes,dim=256,depth=8,heads=6,mlp_dim=256,dim_head=256,dropout=0.1, emb_dropout=0.1)
     elif 'vgg16' in arch:
         base = vision_models.vgg16(pretrained=weights)
         num_features = base.classifier[6].in_features
@@ -85,8 +89,8 @@ def get_model(arch, data_config,  weights=False, loss_type="cross-entropy", opt=
     if es > 0:
         model.add_module("dropout", nn.Dropout(0.2))
         model.add_module("embeddings", nn.Linear(128, es))
-    else:
-        es = 64
+    # else:
+    #     es = 64
 
     if loss_type == 'triplet':
         # model.add_module("l2-normal", F.normalize(out, p=2, dim=1))  # l2-normalisation
@@ -97,8 +101,13 @@ def get_model(arch, data_config,  weights=False, loss_type="cross-entropy", opt=
         criterion = triplet_loss
     else:
         criterion = CrossEntropyLoss()
-        if base_model.fc.out_features != data_config.nc:
-            model.add_module("fc", nn.Linear(es, data_config.nc))
+        print("es value for ViT ", es)
+        if es == 0:  # special case for ViT
+            model = base_model
+        else:
+            es = 64
+            if base_model.fc.out_features != data_config.nc:
+                model.add_module("fc", nn.Linear(es, data_config.nc))
         # model.add_module("softmax", nn.Softmax(dim=1))
 
     params = model.parameters()

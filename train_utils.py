@@ -15,6 +15,9 @@ import torch
 import pandas as pd
 from torchsummary import summary
 from torch.utils.data import DataLoader
+import platform
+
+
 device = torch.device("cuda")
 template1 = "Labeled= {} selection={}% iterations= {}"
 template2 = 'total selected based on percentile {} having accuracy {:.2f}%'
@@ -77,7 +80,7 @@ def predict(model, imgs, verbose=False, dev=None,  bs=128):
 
 
 def evaluate(model, imgs, lbls=None, loss_fn=None, verbose=False, dev=None, bs=128):
-
+    # print("EVAL func::  device = ", dev, " labels shape   ", lbls.shape)
     if isinstance(imgs, DataLoader):
         dl = imgs
     else:
@@ -87,7 +90,7 @@ def evaluate(model, imgs, lbls=None, loss_fn=None, verbose=False, dev=None, bs=1
     num_of_batches_per_epoch = np.ceil(len(dl.dataset) / dl.batch_size)
     kbar = pkbar.Kbar(target=num_of_batches_per_epoch, epoch=None, num_epochs=None, width=8, always_stateful=False)
 
-    acc = Accuracy().to(dev)
+    acc = Accuracy(task="multiclass",num_classes=10).to(dev)
     loss = MeanMetric().to(dev)
     test_loss = 0.
     with torch.no_grad():
@@ -193,7 +196,7 @@ def start_training(model, dso, epochs=100, semi=True, bs=100, verb=True, name="c
 def do_training(model, images, labels, test_images, test_labels, train_iter=10, batch_size=100, verb=True, vf=20,
                 iter='', name="cifar10"):
     csv_path = "./csvs/{}-{}-supervised-{}-{}.csv".format(iter, str(len(labels)), time.strftime("%d-%m-%Y-%H%M%S"),
-                                                          os.uname()[1])
+                                                          platform.uname()[1])
     print("saving losses at ", csv_path)
     test_generator = create_data_loader(test_images, test_labels, batch_size, is_train=False)
     train_generator = create_data_loader(images, labels, bs=batch_size, name=name)
@@ -220,7 +223,7 @@ def train_pbar(train_loader, model, optimizer, criterion, epochs=200, testloader
         loop_range = range(epochs)
     else:
         loop_range = tqdm(range(epochs))
-    accuracy = Accuracy().to(dev)
+    accuracy = Accuracy(task="multiclass",num_classes=10).to(dev)
     loss = MeanMetric().to(dev)
     model.to(dev)
     for epoch in loop_range:

@@ -75,6 +75,6 @@ def read_data_sets(name, channel_first=True):
     if channel_first:
         train_images = train_images.transpose(0, 3, 1, 2)
         test_images = test_images.transpose(0, 3, 1, 2)
-    print('check ...!!!', train_images.shape, train_labels.shape, test_images.shape, test_labels.shape)
+    # print('check ...!!!', train_images.shape, train_labels.shape, test_images.shape, test_labels.shape)
 
     return train_images, train_labels, test_images, test_labels

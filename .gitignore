@@ -1,0 +1,4 @@
+csvs/
+reslcross-entropy_logs/
+cross-entropy_logs
+*.pyc

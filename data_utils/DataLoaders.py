@@ -200,7 +200,7 @@ class SSL:
         x = x.astype(np.uint8)
         self.x = x
         self.y = y
-        print("type of dataset", type(self.x[0,0,0,0]), self.x.shape)
+        # print("type of dataset", type(self.x[0,0,0,0]), self.x.shape)
 
     def __getitem__(self, idx):
         image = self.x[idx]
@@ -217,7 +217,7 @@ class SSLUNLAB:
         x = x.astype(np.uint8)
         self.x = x
         # self.y = y
-        print("type of dataset", type(self.x[0,0,0,0]), self.x.shape)
+        # print("type of dataset", type(self.x[0,0,0,0]), self.x.shape)
 
     def __getitem__(self, idx):
         image = self.x[idx]

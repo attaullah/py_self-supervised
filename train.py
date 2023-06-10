@@ -17,7 +17,7 @@ def main(argv):
     dso, data_config = train_utils.set_dataset(FLAGS.dataset, FLAGS.lt, FLAGS.semi, scale=False, channel_first=True)
     model, optimizer, criterion = train_utils.set_model(FLAGS.network, data_config, FLAGS.weights, FLAGS.lt, FLAGS.opt, FLAGS.lr)
     # set up logging details
-    log_dir, log_name = train_utils.get_log_name(FLAGS, data_config, prefix="resl")
+    log_dir, log_name = train_utils.get_log_name(FLAGS, data_config, prefix="")
     os.makedirs(log_dir, exist_ok=True)
     logging.get_absl_handler().use_absl_log_file(log_name, log_dir)
     logging.get_absl_handler().setFormatter(None)
