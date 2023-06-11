@@ -195,6 +195,7 @@ def start_training(model, dso, epochs=100, semi=True, bs=100, verb=True, name="c
 
 def do_training(model, images, labels, test_images, test_labels, train_iter=10, batch_size=100, verb=True, vf=20,
                 iter='', name="cifar10"):
+    os.makedirs("./csvs/", exist_ok=True)
     csv_path = "./csvs/{}-{}-supervised-{}-{}.csv".format(iter, str(len(labels)), time.strftime("%d-%m-%Y-%H%M%S"),
                                                           platform.uname()[1])
     print("saving losses at ", csv_path)
