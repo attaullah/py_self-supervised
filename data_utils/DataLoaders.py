@@ -13,11 +13,9 @@ def create_my_datasets(img, y=None, is_train=True, name="cifar10"):
     # data = x.astype(np.float64)
     # data = 255 * data
     # img = x.astype(np.uint8)
-    # print(np.max(img[0,0,:,0]))
-    # print("ALb transform for ", name, " train ", is_train)
     train_transform, val_transform = alb_transform(name)  # get_transforms
     if y is not None:
-        return SSL(img, y)
+        return SSL(img, y,is_train, name)
         # if is_train:
         #     return AlbTransDataset(img, y, train_transform)  # CustomTensorDataset
         # return AlbTransDataset(img, y, val_transform)
@@ -196,16 +194,33 @@ class IODataset(Dataset):
 
 
 class SSL:
-    def __init__(self, x, y):
+    def __init__(self, x, y, is_train=True, name="cifar10"):
         x = x.astype(np.uint8)
         self.x = x
         self.y = y
+        size = x.shape[2]
+        transforms_list = [T.ToPILImage(), T.RandomCrop(size, padding=4), T.Resize(size),
+        T.RandomHorizontalFlip(), T.ToTensor(), T.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))]
+        if name == "svhn":
+            transforms_list = [T.ToPILImage(), T.Resize(size), T.ToTensor(),
+                               T.Normalize((0.4377, 0.4438, 0.4728), (0.1980, 0.2010, 0.1970))]
+        transform_train = T.Compose(transforms_list)
+        transform_test = T.Compose([
+            T.ToPILImage(),
+            T.Resize(size),
+            T.ToTensor(),
+            T.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),])
         # print("type of dataset", type(self.x[0,0,0,0]), self.x.shape)
+        if is_train:
+            self.transform = transform_train
+        else:
+            self.transform = transform_test
 
     def __getitem__(self, idx):
         image = self.x[idx]
         label = self.y[idx]
-        image = (image/255. - 0.5)/0.5
+        image = self.transform(image)
+        # image = (image/255. - 0.5)/0.5
         return image, label
 
     def __len__(self):

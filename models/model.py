@@ -79,13 +79,22 @@ def get_optimizer(opt, lr, params,  wd=5e-4):
         sys.exit(1)
 
 
-def get_model(arch, data_config,  weights=False, loss_type="cross-entropy", opt="adam", lr=1e-3, margin=1.):
+def get_lr_scheduler(optim, name="cosine", n_epochs=200):
+    if name == "cosine":
+        sched = torch.optim.lr_scheduler.CosineAnnealingLR(optim, T_max=n_epochs)
+        print("Using CosineLR scheduler")
+    else: 
+        print("Not using LR scheduler")
+    return sched
+
+
+def get_model(arch, data_config,  weights=False, loss_type="cross-entropy", opt="adam", lr=1e-3, lr_sched=None, margin=1.):
 
     base_model, es = get_network(arch, data_config.size, data_config.channels, num_classes=data_config.nc,
                                  weights=weights, d_set=data_config.name)  # flags.w
     model = nn.Sequential()
     model.add_module("base", base_model)
-    print("Get model:: ", data_config.nc, es)
+    # print("Get model:: ", data_config.nc, es)
     if es > 0:
         model.add_module("dropout", nn.Dropout(0.2))
         model.add_module("embeddings", nn.Linear(128, es))
@@ -93,15 +102,10 @@ def get_model(arch, data_config,  weights=False, loss_type="cross-entropy", opt=
     #     es = 64
 
     if loss_type == 'triplet':
-        # model.add_module("l2-normal", F.normalize(out, p=2, dim=1))  # l2-normalisation
-        # reducer = reducers.ThresholdReducer(low=0)
-        # loss_func = losses.TripletMarginLoss(margin, reducer=reducer)
-        # mining_func = miners.TripletMarginMiner(margin, type_of_triplets="semihard")
-        # criterion = [loss_func, mining_func]
         criterion = triplet_loss
     else:
         criterion = CrossEntropyLoss()
-        print("es value for ViT ", es)
+        # print("es value for ViT ", es)
         if es == 0:  # special case for ViT
             model = base_model
         else:
@@ -112,4 +116,6 @@ def get_model(arch, data_config,  weights=False, loss_type="cross-entropy", opt=
 
     params = model.parameters()
     optimizer = get_optimizer(opt, lr, params)
-    return model, optimizer, criterion
+    if lr_sched is not None:
+        lr_sched = get_lr_scheduler(optimizer, name=lr_sched, n_epochs=200)  
+    return model, optimizer, criterion, lr_sched

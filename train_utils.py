@@ -30,10 +30,10 @@ def set_dataset(dataset, lt, semi=True, scale=False, channel_first=False):
     return dso, data_config
 
 
-def set_model(arch, data_config, weights, loss_type="", opt="adam", lr=1e-3):
-    model, optimizer, criterion = get_model(arch, data_config, weights, loss_type, opt, lr)
+def set_model(arch, data_config, weights, loss_type="", opt="adam", lr=1e-3,lr_sched=None):
+    model, optimizer, criterion, lr_sched = get_model(arch, data_config, weights, loss_type, opt, lr, lr_sched)
     summary(model, input_size=(data_config.channels, data_config.size, data_config.size), device='cpu')
-    return model, optimizer, criterion
+    return model, optimizer, criterion, lr_sched
 
 
 def get_log_name(flags, data_config, prefix=""):
@@ -183,18 +183,18 @@ def log_accuracy(model, dso, loss_type="", semi=True, labelling="knn"):
     return acc
 
 
-def start_training(model, dso, epochs=100, semi=True, bs=100, verb=True, name="cifar10"):
+def start_training(model, dso, epochs=100, semi=True, bs=100, verb=True, name="cifar10", lr_sched=None):
     if semi:  # N-labelled
         images, labels = dso.train.labeled_ds.images, dso.train.labeled_ds.labels
     else:  # all-labelled examples
         images, labels = dso.train.images, dso.train.labels,
 
     do_training(model, images, labels, dso.test.images, dso.test.labels, train_iter=epochs, batch_size=bs, verb=verb,
-                name=name)
+                name=name, lr_sched=lr_sched)
 
 
 def do_training(model, images, labels, test_images, test_labels, train_iter=10, batch_size=100, verb=True, vf=20,
-                iter='', name="cifar10"):
+                iter='', name="cifar10", lr_sched=None):
     os.makedirs("./csvs/", exist_ok=True)
     csv_path = "./csvs/{}-{}-supervised-{}-{}.csv".format(iter, str(len(labels)), time.strftime("%d-%m-%Y-%H%M%S"),
                                                           platform.uname()[1])
@@ -203,7 +203,7 @@ def do_training(model, images, labels, test_images, test_labels, train_iter=10, 
     train_generator = create_data_loader(images, labels, bs=batch_size, name=name)
     model, optimizer, criterion = model
     history = train_pbar(train_generator, model, optimizer, criterion, epochs=train_iter, testloader=test_generator,
-                         print_freq=vf, verbose=verb, lr_sched=None, dev=device, csv_path=csv_path)
+                         print_freq=vf, verbose=verb, lr_sched=lr_sched, dev=device, csv_path=csv_path)
 
     return history, csv_path
 
@@ -267,7 +267,7 @@ def train_pbar(train_loader, model, optimizer, criterion, epochs=200, testloader
                     val_loss = 0.
 
                 if lr_sched is not None and lr_sched:
-                    lr = lr_sched.get_lr()[0]
+                    lr = lr_sched.get_last_lr()
                 else:
                     lr = optimizer.param_groups[0]['lr']
             # Add validation metrics
@@ -296,8 +296,8 @@ def train_pbar(train_loader, model, optimizer, criterion, epochs=200, testloader
     return log
 
 
-def start_self_learning(model, dso, dc, lt, i, mti, bs, logger):
-    self_learning(model, dso, lt, logger,  i, dc.sp, mti, bs)
+def start_self_learning(model, dso, dc, lt, i, mti, bs, logger, lr_sched=None):
+    self_learning(model, dso, lt, logger,  i, dc.sp, mti, bs, lr_sched=lr_sched)
 
 
 def pseudo_label_selection(imgs, pred_lbls, scores, orig_lbls, p=0.05):
@@ -364,7 +364,7 @@ def assign_labels(model, train_labels, train_images, unlabeled_imgs, unlabeled_l
     return pred_lbls, pred_score, pred_acc
 
 
-def self_learning(model, mdso, lt,  logger, num_iterations=25, percentile=0.05, epochs=200, bs=100):
+def self_learning(model, mdso, lt,  logger, num_iterations=25, percentile=0.05, epochs=200, bs=100, lr_sched=None):
 
     # Initial labeled data
     imgs = mdso.train.labeled_ds.images
@@ -384,7 +384,7 @@ def self_learning(model, mdso, lt,  logger, num_iterations=25, percentile=0.05, 
     for i in range(num_iterations):
         print('=============== Meta-iteration = ', str(i + 1), '/', num_iterations, ' =======================')
         # 1- training
-        do_training(model, imgs, lbls, mdso.test.images, mdso.test.labels, epochs, bs, iter=str(i+1))
+        do_training(model, imgs, lbls, mdso.test.images, mdso.test.labels, epochs, bs, iter=str(i+1), lr_sched=lr_sched)
         # 2- predict labels and confidence score
         pred_lbls, pred_score, unlabeled_acc = assign_labels(model, mdso.train.labeled_ds.labels,
                                                              mdso.train.labeled_ds.images, unlabeled_imgs,

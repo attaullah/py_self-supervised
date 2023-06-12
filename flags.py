@@ -22,6 +22,8 @@ def setup_flags():
     flags.DEFINE_enum(name="opt", default="adam", enum_values=["adam", "sgd", "sgdw", "rmsprop"],
                       help="optimizer.")
     flags.DEFINE_float('lr', help="learning_rate", default=3e-3)
+    flags.DEFINE_enum(name="lr_sched", default=None, enum_values=["cosine", ""],
+                      help="lr_sched: None, cosine,  .")
     # metric learning losses related
     flags.DEFINE_enum('lbl', help="shallow classifiers for labelling for metric learning losses", default="knn",
                       enum_values=["knn", "lda", "rf", "lr"])
