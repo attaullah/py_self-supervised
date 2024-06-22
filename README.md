@@ -1,9 +1,9 @@
 # Self-training
 This repository contains code for the PhD thesis: ["A Study of Self-training Variants for
-Semi-supervised Image Classification"] (https://researchcommons.waikato.ac.nz/handle/10289/14678) and publications. This PyTorch variant of my original repo from
+Semi-supervised Image Classification"] (https://researchcommons.waikato.ac.nz/handle/10289/14678) and publications. This is PyTorch variant of my original repo from
 [https://github.com/attaullah/self-training](https://github.com/attaullah/self-training)
 1. Sahito A., Frank E., Pfahringer B. (2019) Semi-supervised Learning Using Siamese Networks. In: Liu J., Bailey J. 
-(eds) AI 2019: Advances in Artificial Intelligence. AI 2019 . Lecture Notes in Computer Science, vol 11919. Springer, 
+(eds) AI 2019: Advances in Artificial Intelligence. AI 2019. Lecture Notes in Computer Science, vol 11919. Springer, 
 Cham. [DOI:978-3-030-35288-2_47](https://link.springer.com/chapter/10.1007/978-3-030-35288-2_47) 
 2. Sahito A., Frank E., Pfahringer B. (2020) Transfer of Pretrained Model Weights Substantially Improves Semi-supervised
 Image Classification. In: Gallagher M., Moustafa N., Lakshika E. (eds) AI 2020: Advances in Artificial Intelligence.
